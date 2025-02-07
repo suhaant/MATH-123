@@ -1,0 +1,22 @@
+def truth_table():
+    #gather user input
+    n = int(input("Enter the number of variables: "))
+    variables = [input(f"Enter name of variable {i+1}: ") for i in range(n)]
+    expression = input("Enter the boolean expression using the variables (e.g., A and not B): ")
+
+    rows = 2 ** n  #total number of rows in the truth table
+    print(" | ".join(variables) + " | Result")
+    print("-" * (4 * n + 9))
+
+    for i in range(rows):
+        #generate boolean values for each variable
+        values = {variables[j]: bool((i >> (n - j - 1)) & 1) for j in range(n)}
+        
+       
+        result = eval(expression, {}, values)
+        
+        #print the row with 'T' and 'F' instead of 1 and 0
+        formatted_values = ["T" if v else "F" for v in values.values()]
+        print(" | ".join(formatted_values) + f" |   {'T' if result else 'F'}")
+
+truth_table()
