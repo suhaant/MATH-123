@@ -1,0 +1,58 @@
+import itertools # used to generate all possible truth table combinations
+import pandas as pd # used to organize and display the truth table in a structured format.
+
+# here is where we are defining the  truth table/function
+def fraud_detection_table():
+    print("Real-world Example: Fraud Detection System")
+    
+    # Define fraud indicators
+    print("Define fraud risk factors (e.g., High Transaction Amount, Unusual Location, Multiple Failed Logins)")
+    n = int(input("Enter the number of risk factors: ")) # this is so tha we know how many colomns will be in the table
+    raw_factors = [input(f"Enter name of risk factor {i+1}: ") for i in range(n)] #here is where they input what risks
+    factors = [f.replace(" ", "_") for f in raw_factors]  # converting to valid variable names.
+    
+    #All this just lets the user see what was just done above with the conversion
+    print("Use the following factor names in your expression:")
+    for raw, processed in zip(raw_factors, factors):
+        print(f"{raw} -> {processed}")
+    
+    # these conditionals will apply a certain logic rule depending on how many arugments are passed through
+    if n == 2:
+        expression = f"{factors[0]} and {factors[1]}"
+    elif n == 3:
+        expression = f"({factors[0]} and {factors[1]}) or {factors[2]}"
+    elif n == 4:
+        expression = f"({factors[0]} and {factors[1]}) or ({factors[2]} and not {factors[3]})"
+    else:
+        extra_conditions = " or ".join(factors[4:]) if len(factors) > 4 else "False"
+        expression = f"({factors[0]} and {factors[1]}) or ({factors[2]} and {factors[3]}) or ({extra_conditions})"
+    
+    print(f"Automatically generated fraud detection rule: {expression}")
+    
+    # Generate all possible combinations of risk factors
+    truth_combinations = list(itertools.product([False, True], repeat=n)) # heres where we are using the itertools import, this simplifies all the logic down to one command
+    
+    # Evaluate the fraud detection rule
+    results = []
+    high_risk_cases = []
+    for combination in truth_combinations:
+        values = dict(zip(factors, combination)) #Dictionary that maps risk factor names to true/value values
+        fraud_risk = eval(expression, {}, values) #this will evaluate the fraud detection expression
+        probability = sum(combination) / n  # Risk probability based on active risk factors
+        results.append((combination, fraud_risk, probability)) 
+        if probability > 0.5:
+            high_risk_cases.append((values, probability)) # Calculates which ones are high risk)
+    
+    # Create a DataFrame for analysis
+    df = pd.DataFrame([{**dict(zip(factors, comb)), 'Fraud Risk': 'T' if res else 'F', 'Risk Score': f"{prob:.2f}"} for comb, res, prob in results])
+    print(df.to_string(index=False))
+    #creates a bunch of different lists of dictionaries, each represents a row in the dataframe, tabular structure
+    
+    # Print high-risk cases
+    if high_risk_cases:
+        print("\nHigher Risk Cases (Risk Score > 0.5):")
+        for case, risk in high_risk_cases:
+            print(f"Factors: {case}, Risk Score: {risk:.2f}")
+
+# Example usage
+fraud_detection_table()
